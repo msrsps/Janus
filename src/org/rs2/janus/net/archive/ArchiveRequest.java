@@ -47,23 +47,33 @@ public class ArchiveRequest {
 		if (request.startsWith("crc")) {
 			return fileSystem.getCrcTable();
 		} else if (request.startsWith("title")) {
-			return fileSystem.getArchive(1, 1);
+			return fileSystem.getFile(0, 1);
 		} else if (request.startsWith("config")) {
-			return fileSystem.getArchive(1, 2);
+			return fileSystem.getFile(0, 2);
 		} else if (request.startsWith("interface")) {
-			return fileSystem.getArchive(1, 3);
+			return fileSystem.getFile(0, 3);
 		} else if (request.startsWith("media")) {
-			return fileSystem.getArchive(1, 4);
+			return fileSystem.getFile(0, 4);
 		} else if (request.startsWith("versionlist")) {
-			return fileSystem.getArchive(1, 5);
+			return fileSystem.getFile(0, 5);
 		} else if (request.startsWith("textures")) {
-			return fileSystem.getArchive(1, 6);
+			return fileSystem.getFile(0, 6);
 		} else if (request.startsWith("wordenc")) {
-			return fileSystem.getArchive(1, 7);
+			return fileSystem.getFile(0, 7);
 		} else if (request.startsWith("sounds")) {
-			return fileSystem.getArchive(1, 8);
+			return fileSystem.getFile(0, 8);
 		}
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ArchiveRequest [request=" + request + "]";
 	}
 
 }

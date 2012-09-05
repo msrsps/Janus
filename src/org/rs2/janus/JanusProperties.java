@@ -33,8 +33,7 @@ public class JanusProperties {
 	}
 
 	/**
-	 * Reads properties from the given file, this used on construction and
-	 * whenever changes to properties should be reloaded.
+	 * Reads properties from the given file.
 	 * 
 	 * @throws IOException
 	 * @throws FileNotFoundException

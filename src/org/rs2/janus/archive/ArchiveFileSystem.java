@@ -21,30 +21,30 @@ public class ArchiveFileSystem {
 	/**
 	 * The singleton.
 	 */
-	private static final ArchiveFileSystem singleton = new ArchiveFileSystem(JanusProperties.getString("ARCHIVE_FILE_DIRECTORY"));
+	private static final ArchiveFileSystem singleton = new ArchiveFileSystem(JanusProperties.getString("CACHE_FILE_DIRECTORY"));
 
 	/**
-	 * The directory of the archives.
+	 * The directory of the cache.
 	 */
 	private final String directory;
 
 	/**
-	 * The data file containing the raw archives.
+	 * The data file containing the raw files.
 	 */
 	private RandomAccessFile dataFile;
 
 	/**
-	 * The indexes pointing to the archives.
+	 * The indexes pointing to the files.
 	 */
-	private ArchiveIndex[][] archiveIndexes = new ArchiveIndex[5][];
+	private fileIndex[][] fileIndexes = new fileIndex[5][];
 
 	/**
 	 * The raw archive files.
 	 */
-	private final ByteBuffer[][] archiveFiles = new ByteBuffer[5][];
+	private final ByteBuffer[][] files = new ByteBuffer[5][];
 
 	/**
-	 * The index files containing indexes pointing to the archives.
+	 * The index files containing indexes pointing to the files.
 	 */
 	private RandomAccessFile indexFiles[] = new RandomAccessFile[5];
 
@@ -77,28 +77,25 @@ public class ArchiveFileSystem {
 	}
 
 	private void load() throws Exception {
-		loadArchiveIndexes();
-		loadArchiveFiles();
+		loadIndexes();
+		loadFiles();
 		loadCrcTable();
-
-		// Free up some pointless memory.
-		archiveIndexes = null;
 
 		for (RandomAccessFile file : indexFiles)
 			file.close();
-
-		indexFiles = null;
-
 		dataFile.close();
+
+		fileIndexes = null;
+		indexFiles = null;
 		dataFile = null;
 	}
 
 	/**
 	 * 
 	 */
-	private void loadArchiveIndexes() {
+	private void loadIndexes() {
 		for (int file = 0; file < indexFiles.length; file++) {
-			ArrayList<ArchiveIndex> indexes = new ArrayList<ArchiveIndex>();
+			ArrayList<fileIndex> indexes = new ArrayList<fileIndex>();
 			for (int index = 0;; index++) {
 				try {
 					byte[] buffer = new byte[6];
@@ -108,30 +105,30 @@ public class ArchiveFileSystem {
 					int size = ((buffer[0] & 0xFF) << 16) | ((buffer[1] & 0xFF) << 8) | (buffer[2] & 0xFF);
 					int block = ((buffer[3] & 0xFF) << 16) | ((buffer[4] & 0xFF) << 8) | (buffer[5] & 0xFF);
 
-					indexes.add(index, new ArchiveIndex(file, index, size, block));
+					indexes.add(index, new fileIndex(file, index, size, block));
 				} catch (Exception e) {
 					break;
 				}
 			}
-			archiveIndexes[file] = indexes.toArray(new ArchiveIndex[indexes.size()]);
+			fileIndexes[file] = indexes.toArray(new fileIndex[indexes.size()]);
 		}
 	}
 
 	/**
 	 * 
 	 */
-	private void loadArchiveFiles() throws IOException {
+	private void loadFiles() throws IOException {
 		int i = 0;
-		for (ArchiveIndex[] indexes : archiveIndexes) {
-			ArrayList<ByteBuffer> archives = new ArrayList<ByteBuffer>();
-			for (ArchiveIndex index : indexes) {
-				ByteBuffer archive = ByteBuffer.allocate(index.getArchiveSize());
+		for (fileIndex[] indexes : fileIndexes) {
+			ArrayList<ByteBuffer> loadedFiles = new ArrayList<ByteBuffer>();
+			for (fileIndex index : indexes) {
+				ByteBuffer archive = ByteBuffer.allocate(index.getFileSize());
 
-				long pos = index.getArchiveBlock() * 520;
+				long pos = index.getFileBlock() * 520;
 				int read = 0;
-				int chunks = index.getArchiveSize() / 512;
+				int chunks = index.getFileSize() / 512;
 
-				if (index.getArchiveSize() % 512 != 0)
+				if (index.getFileSize() % 512 != 0)
 					chunks++;
 
 				for (int chunk = 0; chunk < chunks; chunk++) {
@@ -139,12 +136,12 @@ public class ArchiveFileSystem {
 					dataFile.seek(pos);
 					dataFile.readFully(chunkHeader);
 
-					int nextArchive = ((chunkHeader[0] & 0xff) << 8) | (chunkHeader[1] & 0xff);
+					int nextCache = ((chunkHeader[0] & 0xff) << 8) | (chunkHeader[1] & 0xff);
 					int curChunk = ((chunkHeader[2] & 0xFF) << 8) | (chunkHeader[3] & 0xFF);
 					int nextBlock = ((chunkHeader[4] & 0xFF) << 16) | ((chunkHeader[5] & 0xFF) << 8) | (chunkHeader[6] & 0xFF);
-					int nextIndexFile = chunkHeader[7] & 0xFF;
+					int nextFile = chunkHeader[7] & 0xFF;
 
-					int payloadSize = index.getArchiveSize() - read > 512 ? 512 : index.getArchiveSize() - read;
+					int payloadSize = index.getFileSize() - read > 512 ? 512 : index.getFileSize() - read;
 					byte[] chunkPayload = new byte[payloadSize];
 					dataFile.readFully(chunkPayload);
 
@@ -154,10 +151,10 @@ public class ArchiveFileSystem {
 				}
 
 				archive.flip();
-				archives.add(index.getArchiveFile(), archive);
+				loadedFiles.add(index.getFile(), archive);
 
 			}
-			archiveFiles[i++] = archives.toArray(new ByteBuffer[archives.size()]);
+			files[i++] = loadedFiles.toArray(new ByteBuffer[loadedFiles.size()]);
 		}
 	}
 
@@ -165,8 +162,8 @@ public class ArchiveFileSystem {
 	 * 
 	 */
 	private void loadCrcTable() {
-		// the number of archives
-		int archives = archiveFiles[0].length;
+		// the number of files
+		int archives = files[0].length;
 
 		// the hash
 		int hash = 1234;
@@ -179,7 +176,7 @@ public class ArchiveFileSystem {
 		for (int i = 1; i < crcs.length; i++) {
 			crc32.reset();
 
-			ByteBuffer bb = archiveFiles[0][i].asReadOnlyBuffer();
+			ByteBuffer bb = files[0][i].asReadOnlyBuffer();
 			byte[] bytes = new byte[bb.remaining()];
 			bb.get(bytes, 0, bytes.length);
 			crc32.update(bytes, 0, bytes.length);
@@ -203,12 +200,12 @@ public class ArchiveFileSystem {
 
 	/**
 	 * 
-	 * @param indexFile
-	 * @param archiveFile
+	 * @param cache
+	 * @param file
 	 * @return
 	 */
-	public ByteBuffer getArchive(int indexFile, int archiveFile) {
-		return archiveFiles[indexFile - 1][archiveFile].asReadOnlyBuffer();
+	public ByteBuffer getFile(int cache, int file) {
+		return files[cache][file].asReadOnlyBuffer();
 	}
 
 	/**

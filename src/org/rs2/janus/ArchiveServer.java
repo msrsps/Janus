@@ -1,14 +1,13 @@
 /**
  * 
  */
-package org.rs2.janus.server;
+package org.rs2.janus;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.rs2.janus.JanusProperties;
 import org.rs2.janus.net.NioServerNetwork;
 import org.rs2.janus.net.archive.ArchiveChannelHandler;
 import org.rs2.janus.net.archive.HttpPipelineFactory;
@@ -25,6 +24,10 @@ import org.rs2.janus.net.archive.JaggrabPipelineFactory;
  * 
  */
 public class ArchiveServer {
+
+	public static void main(String[] args) {
+		new ArchiveServer().init();
+	}
 
 	/**
 	 * The logger.
@@ -71,6 +74,8 @@ public class ArchiveServer {
 
 		if (!httpFlag && !jaggrabFlag)
 			throw new RuntimeException("Error initiating both the Http and Jaggrab Networks!");
+
+		log.info("Archive Server successfully initiated.");
 	}
 
 	/**
