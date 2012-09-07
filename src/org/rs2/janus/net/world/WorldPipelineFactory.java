@@ -43,7 +43,7 @@ public class WorldPipelineFactory implements ChannelPipelineFactory {
 		pipeline.addFirst(HandshakeDecoder.class.getSimpleName(), new HandshakeDecoder());
 
 		pipeline.addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(timer, 15, 15, 0));
-		pipeline.addLast(WorldChannelHandler.class.getSimpleName(), handler);
+		pipeline.addLast("handler", handler);
 		return pipeline;
 	}
 

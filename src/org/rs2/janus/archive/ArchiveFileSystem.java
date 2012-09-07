@@ -13,6 +13,8 @@ import java.util.zip.CRC32;
 import org.rs2.janus.JanusProperties;
 
 /**
+ * A file system responsible for loading files from the archives/cache.
+ * 
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
@@ -54,8 +56,10 @@ public class ArchiveFileSystem {
 	private ByteBuffer crcTable;
 
 	/**
+	 * New instance.
 	 * 
 	 * @param directory
+	 *            The directory of the cache.
 	 */
 	private ArchiveFileSystem(String directory) {
 		try {
@@ -76,6 +80,11 @@ public class ArchiveFileSystem {
 		}
 	}
 
+	/**
+	 * Loads the file system.
+	 * 
+	 * @throws Exception
+	 */
 	private void load() throws Exception {
 		loadIndexes();
 		loadFiles();
@@ -91,7 +100,7 @@ public class ArchiveFileSystem {
 	}
 
 	/**
-	 * 
+	 * Loads file indexes from index files.
 	 */
 	private void loadIndexes() {
 		for (int file = 0; file < indexFiles.length; file++) {
@@ -115,7 +124,7 @@ public class ArchiveFileSystem {
 	}
 
 	/**
-	 * 
+	 * Loads files from the data file.
 	 */
 	private void loadFiles() throws IOException {
 		int i = 0;
@@ -159,7 +168,7 @@ public class ArchiveFileSystem {
 	}
 
 	/**
-	 * 
+	 * Loads the archive Crcs into a table.
 	 */
 	private void loadCrcTable() {
 		// the number of files
@@ -199,10 +208,13 @@ public class ArchiveFileSystem {
 	}
 
 	/**
+	 * Gets a file from the file system.
 	 * 
 	 * @param cache
+	 *            The cache the file is located in.
 	 * @param file
-	 * @return
+	 *            The file that will be retrieved.
+	 * @return The retrieved file.
 	 */
 	public ByteBuffer getFile(int cache, int file) {
 		return files[cache][file].asReadOnlyBuffer();

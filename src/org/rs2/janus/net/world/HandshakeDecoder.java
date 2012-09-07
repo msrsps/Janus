@@ -9,9 +9,12 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.rs2.janus.net.login.LoginRequestDecoder;
 import org.rs2.janus.net.ondemand.OnDemandRequestDecoder;
 
 /**
+ * Reads the initial service code by the client and adds the correct decoders.
+ * 
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
@@ -21,6 +24,13 @@ public class HandshakeDecoder extends FrameDecoder {
 	 * The logger.
 	 */
 	private static final Logger log = Logger.getLogger(HandshakeDecoder.class);
+
+	/**
+	 * New instance
+	 */
+	public HandshakeDecoder() {
+		super(true);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -35,21 +45,37 @@ public class HandshakeDecoder extends FrameDecoder {
 		if (buffer.readable()) {
 			int serviceCode = buffer.readByte();
 			switch (serviceCode) {
-			case 15:
-				channel.getPipeline().addBefore(WorldChannelHandler.class.getSimpleName(), OnDemandRequestDecoder.class.getSimpleName(),
-						new OnDemandRequestDecoder());
+			case 14: // Login service
+				ctx.getPipeline().addBefore("handler", LoginRequestDecoder.class.getSimpleName(), new LoginRequestDecoder());
+				completeHandshake(channel);
+				log.info("Login channel=" + channel);
+				break;
+			case 15: // On-Demand service
+				ctx.getPipeline().addBefore("handler", OnDemandRequestDecoder.class.getSimpleName(), new OnDemandRequestDecoder());
+				completeHandshake(channel);
+				log.info("OnDemand channel=" + channel);
 				break;
 			default:
 				log.warn("Service code " + serviceCode + " is unhandled.");
 				return null;
 			}
 
-			ChannelBuffer handshake = ChannelBuffers.buffer(8);
-			handshake.writeZero(8);
-			channel.write(handshake);
-			channel.getPipeline().remove(this);
+			ctx.getPipeline().remove(this);
+
 		}
 		return null;
+	}
+
+	/**
+	 * Completes the handshake by sending 8 bytes with the value of 0.
+	 * 
+	 * @param channel
+	 *            The channel to send to.
+	 */
+	private void completeHandshake(Channel channel) {
+		ChannelBuffer handshake = ChannelBuffers.buffer(17);
+		handshake.writeZero(8);
+		channel.write(handshake);
 	}
 
 }

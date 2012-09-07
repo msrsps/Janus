@@ -9,23 +9,30 @@ import org.jboss.netty.channel.Channel;
 import org.rs2.janus.archive.ArchiveFileSystem;
 
 /**
+ * A worker that executes and responds to {@link OnDemandRequest}s.
+ * 
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
 public class OnDemandWorker implements Runnable, Comparable<OnDemandWorker> {
 
 	/**
-	 * 
+	 * The {@link OnDemandRequest} that this worker will respond to.
 	 */
 	private final OnDemandRequest request;
 
 	/**
-	 * 
+	 * The {@link Channel} to respond to.
 	 */
 	private final Channel channel;
 
 	/**
+	 * New instance.
 	 * 
+	 * @param channel
+	 *            The {@link Channel} to respond to.
+	 * @param request
+	 *            The {@link OnDemandRequest} that this worker will respond to.
 	 */
 	public OnDemandWorker(Channel channel, OnDemandRequest request) {
 		this.request = request;
@@ -39,7 +46,6 @@ public class OnDemandWorker implements Runnable, Comparable<OnDemandWorker> {
 	 */
 	@Override
 	public void run() {
-		System.out.println(request);
 		ChannelBuffer fileBuffer = ChannelBuffers.wrappedBuffer(ArchiveFileSystem.getSingleton().getFile(request.getIndexFile(),
 				request.getArchiveFile()));
 		for (int chunk = 0; fileBuffer.readable(); chunk++) {
