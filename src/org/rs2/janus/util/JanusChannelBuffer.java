@@ -6,20 +6,12 @@ package org.rs2.janus.util;
 import java.nio.ByteBuffer;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
 public class JanusChannelBuffer {
-
-	public static void main(String[] args) {
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		buffer.writeInt(2147483647);
-		JanusChannelBuffer reader = new JanusChannelBuffer(buffer);
-		System.out.println(reader.readSigned(DataType.INT, DataEndianness.BIG, DataTransformation.NONE));
-	}
 
 	/**
 	 * List of bit masks used to convert data from signed to unsigned.

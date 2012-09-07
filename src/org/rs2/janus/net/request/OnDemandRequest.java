@@ -1,13 +1,14 @@
 /**
  * 
  */
-package org.rs2.janus.net.ondemand;
+package org.rs2.janus.net.request;
+
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
-public class OnDemandRequest implements Comparable<OnDemandRequest> {
+public class OnDemandRequest implements Request, Comparable<OnDemandRequest> {
 
 	/**
 	 * 

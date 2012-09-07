@@ -3,20 +3,14 @@
  */
 package org.rs2.janus.net.world;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelUpstreamHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
-import org.rs2.janus.JanusProperties;
-import org.rs2.janus.net.ondemand.OnDemandRequest;
-import org.rs2.janus.net.ondemand.OnDemandWorker;
+import org.rs2.janus.net.request.Request;
+import org.rs2.janus.net.service.Service;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -25,15 +19,9 @@ import org.rs2.janus.net.ondemand.OnDemandWorker;
 public class WorldChannelHandler extends IdleStateAwareChannelUpstreamHandler {
 
 	/**
-	 * 
+	 * The logger.
 	 */
 	private static final Logger log = Logger.getLogger(WorldChannelHandler.class);
-
-	/**
-	 * Thread pool for executing on-demand requests.
-	 */
-	private final ExecutorService ondemandExecutor = new ThreadPoolExecutor(JanusProperties.getInt("ONDEMAND_WORKER_THREADS"), JanusProperties
-			.getInt("ONDEMAND_WORKER_THREADS"), 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<Runnable>());
 
 	/*
 	 * (non-Javadoc)
@@ -46,10 +34,16 @@ public class WorldChannelHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		Object message = e.getMessage();
-		if (message instanceof OnDemandRequest)
-			ondemandExecutor.execute(new OnDemandWorker(e.getChannel(), (OnDemandRequest) message));
-		else
+		if (ctx.getChannel().getAttachment() != null) {
+			Object attachment = e.getChannel().getAttachment();
+			if (attachment instanceof Service) {
+				((Service<Request>) attachment).serviceRequest(ctx, (Request) message);
+			} else if (attachment instanceof Object) {
+				// Handle packets to player.
+			}
+		} else {
 			log.info("Unhandled message [message=" + message + ", channel=" + ctx.getChannel() + "]");
+		}
 	}
 
 	/*
