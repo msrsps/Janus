@@ -1,7 +1,9 @@
 /**
  * 
  */
-package org.rs2.janus.net.request;
+package org.rs2.janus.net.ondemand;
+
+import org.rs2.janus.net.Request;
 
 
 /**

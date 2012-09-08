@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.rs2.janus.net.service;
+package org.rs2.janus.net.ondemand;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -14,7 +14,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.rs2.janus.JanusProperties;
 import org.rs2.janus.archive.ArchiveFileSystem;
-import org.rs2.janus.net.request.OnDemandRequest;
+import org.rs2.janus.net.Service;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>

@@ -3,6 +3,7 @@
  */
 package org.rs2.janus.net.login;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 import org.apollo.util.StatefulFrameDecoder;
@@ -10,6 +11,10 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.rs2.janus.JanusProperties;
+import org.rs2.janus.util.IsaacRandomPair;
+import org.rs2.janus.util.TextUtil;
+import org.rs2.janus.world.model.entity.character.player.PlayerCredientals;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -21,6 +26,16 @@ public class LoginRequestDecoder extends StatefulFrameDecoder<LoginRequestDecode
 	 * The random that will generate server seeds.
 	 */
 	private static final Random serverSeedGen = new Random(System.currentTimeMillis());
+
+	/**
+	 * 
+	 */
+	private static final BigInteger RSA_MODULUS = new BigInteger(JanusProperties.getString("RSA_MODULUS"));
+
+	/**
+	 * 
+	 */
+	private static final BigInteger RSA_EXPONENT = new BigInteger(JanusProperties.getString("RSA_EXPONENT"));
 
 	/**
 	 * The generated server seed.
@@ -107,19 +122,59 @@ public class LoginRequestDecoder extends StatefulFrameDecoder<LoginRequestDecode
 	 * @param buffer
 	 * @return
 	 */
-	private Object decodePayload(Channel channel, ChannelBuffer buffer) {
+	private Object decodePayload(Channel channel, ChannelBuffer buffer) throws Exception {
 		if (buffer.readableBytes() >= payloadSize) {
+			int uid;
+			int lowMemoryFlag;
+			int securePayloadSize;
+			int[] archiveCrcs = new int[9];
+			long clientSeed;
+			String user;
+			String pass;
+			IsaacRandomPair isaacPair;
+
 			ChannelBuffer payload = ChannelBuffers.buffer(payloadSize);
 			buffer.readBytes(payload);
 
-			ChannelBuffer loginResponse = ChannelBuffers.buffer(3);
-			loginResponse.writeByte(2);
-			loginResponse.writeByte(0);
-			loginResponse.writeByte(0);
+			if (payload.readUnsignedByte() != 0xFF)
+				throw new Exception("Magic id mismatch.");
 
-			channel.write(loginResponse);
+			if (payload.readUnsignedShort() != JanusProperties.getInt("SERVER_REVISION"))
+				throw new Exception("Wrong revision.");
 
-			channel.getPipeline().remove(this);
+			lowMemoryFlag = payload.readUnsignedByte();
+
+			for (int index = 0; index < 9; index++)
+				archiveCrcs[index] = payload.readInt();
+
+			securePayloadSize = payload.readUnsignedByte();
+
+			if (securePayloadSize != payloadSize - 41)
+				throw new Exception("Secure payload size mismatch");
+
+			ChannelBuffer securePayload = ChannelBuffers.buffer(securePayloadSize);
+			payload.readBytes(securePayload);
+
+			BigInteger bigInteger = new BigInteger(securePayload.array()).modPow(RSA_EXPONENT, RSA_MODULUS);
+			securePayload = ChannelBuffers.wrappedBuffer(bigInteger.toByteArray());
+
+			if (securePayload.readUnsignedByte() != 10)
+				throw new Exception("Secure id mismatch.");
+
+			clientSeed = securePayload.readLong();
+
+			if (securePayload.readLong() != serverSeed)
+				return new Exception("Server seed mismatch.");
+
+			isaacPair = new IsaacRandomPair(clientSeed, clientSeed);
+
+			uid = securePayload.readInt();
+
+			user = TextUtil.decodeText(securePayload);
+			pass = TextUtil.decodeText(securePayload);
+
+			return new LoginRequest(new PlayerCredientals(user, pass, uid, isaacPair), lowMemoryFlag == 1, loginType == 18, namehash, archiveCrcs);
+
 		}
 		return null;
 	}

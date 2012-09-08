@@ -38,7 +38,7 @@ public class ArchiveFileSystem {
 	/**
 	 * The indexes pointing to the files.
 	 */
-	private fileIndex[][] fileIndexes = new fileIndex[5][];
+	private FileIndex[][] fileIndexes = new FileIndex[5][];
 
 	/**
 	 * The raw archive files.
@@ -104,7 +104,7 @@ public class ArchiveFileSystem {
 	 */
 	private void loadIndexes() {
 		for (int file = 0; file < indexFiles.length; file++) {
-			ArrayList<fileIndex> indexes = new ArrayList<fileIndex>();
+			ArrayList<FileIndex> indexes = new ArrayList<FileIndex>();
 			for (int index = 0;; index++) {
 				try {
 					byte[] buffer = new byte[6];
@@ -114,12 +114,12 @@ public class ArchiveFileSystem {
 					int size = ((buffer[0] & 0xFF) << 16) | ((buffer[1] & 0xFF) << 8) | (buffer[2] & 0xFF);
 					int block = ((buffer[3] & 0xFF) << 16) | ((buffer[4] & 0xFF) << 8) | (buffer[5] & 0xFF);
 
-					indexes.add(index, new fileIndex(file, index, size, block));
+					indexes.add(index, new FileIndex(file, index, size, block));
 				} catch (Exception e) {
 					break;
 				}
 			}
-			fileIndexes[file] = indexes.toArray(new fileIndex[indexes.size()]);
+			fileIndexes[file] = indexes.toArray(new FileIndex[indexes.size()]);
 		}
 	}
 
@@ -128,9 +128,9 @@ public class ArchiveFileSystem {
 	 */
 	private void loadFiles() throws IOException {
 		int i = 0;
-		for (fileIndex[] indexes : fileIndexes) {
+		for (FileIndex[] indexes : fileIndexes) {
 			ArrayList<ByteBuffer> loadedFiles = new ArrayList<ByteBuffer>();
-			for (fileIndex index : indexes) {
+			for (FileIndex index : indexes) {
 				ByteBuffer archive = ByteBuffer.allocate(index.getFileSize());
 
 				long pos = index.getFileBlock() * 520;

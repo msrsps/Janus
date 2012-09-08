@@ -9,8 +9,8 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelUpstreamHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
-import org.rs2.janus.net.request.Request;
-import org.rs2.janus.net.service.Service;
+import org.rs2.janus.net.Request;
+import org.rs2.janus.net.Service;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -57,6 +57,7 @@ public class WorldChannelHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
 		log.error("Exception Caught [cause=" + e.getCause() + ", channel=" + ctx.getChannel() + "], closing channel.");
+		e.getCause().printStackTrace();
 		ctx.getChannel().close();
 	}
 

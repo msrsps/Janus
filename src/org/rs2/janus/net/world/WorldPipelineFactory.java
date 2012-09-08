@@ -8,7 +8,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.jboss.netty.util.HashedWheelTimer;
-import org.rs2.janus.net.service.Service;
+import org.rs2.janus.net.Service;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>

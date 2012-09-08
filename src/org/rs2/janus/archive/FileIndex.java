@@ -9,7 +9,7 @@ package org.rs2.janus.archive;
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
-public class fileIndex {
+public class FileIndex {
 
 	/**
 	 * The cache file containing this index.
@@ -37,7 +37,7 @@ public class fileIndex {
 	 * @param fileSize
 	 * @param fileBlock
 	 */
-	public fileIndex(int cache, int file, int fileSize, int fileBlock) {
+	public FileIndex(int cache, int file, int fileSize, int fileBlock) {
 		super();
 		this.cache = cache;
 		this.file = file;

@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.rs2.janus.net.request.OnDemandRequest;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>

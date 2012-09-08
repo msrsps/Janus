@@ -9,10 +9,10 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.rs2.janus.net.Service;
 import org.rs2.janus.net.login.LoginRequestDecoder;
 import org.rs2.janus.net.ondemand.OnDemandRequestDecoder;
-import org.rs2.janus.net.service.OnDemandService;
-import org.rs2.janus.net.service.Service;
+import org.rs2.janus.net.ondemand.OnDemandService;
 
 /**
  * Reads the initial service code by the client and adds the correct decoders.
@@ -54,14 +54,14 @@ public class HandshakeDecoder extends FrameDecoder {
 			int serviceCode = buffer.readByte();
 			switch (serviceCode) {
 			case 14: // Login service
-				channel.setAttachment(loginService);
 				ctx.getPipeline().addBefore("handler", LoginRequestDecoder.class.getSimpleName(), new LoginRequestDecoder());
-				completeHandshake(channel);
+				channel.setAttachment(loginService);
+				completeHandshake(ctx.getChannel());
 				break;
 			case 15: // On-Demand service
-				channel.setAttachment(OnDemandService.getSingleton());
 				ctx.getPipeline().addBefore("handler", OnDemandRequestDecoder.class.getSimpleName(), new OnDemandRequestDecoder());
-				completeHandshake(channel);
+				channel.setAttachment(OnDemandService.getSingleton());
+				completeHandshake(ctx.getChannel());
 				log.info("OnDemand channel=" + channel);
 				break;
 			default:
@@ -70,6 +70,7 @@ public class HandshakeDecoder extends FrameDecoder {
 			}
 
 			ctx.getPipeline().remove(this);
+			return buffer;
 
 		}
 		return null;
