@@ -3,6 +3,8 @@
  */
 package org.rs2.janus.world;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.concurrent.Executors;
 
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -12,8 +14,6 @@ import org.rs2.janus.net.Service;
 import org.rs2.janus.net.login.LoginService;
 import org.rs2.janus.net.world.WorldChannelHandler;
 import org.rs2.janus.net.world.WorldPipelineFactory;
-import org.rs2.janus.util.LimitedMap;
-import org.rs2.janus.world.model.entity.character.Player;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -23,9 +23,9 @@ public class World {
 
 	public static void main(String[] args) {
 		try {
-			new World().initNetwork();
+			World world = new World();
+			world.init();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -53,7 +53,25 @@ public class World {
 	/**
 	 * 
 	 */
-	private final LimitedMap<String, Player> worldPlayers = new LimitedMap<String, Player>(2000);
+	private Connection sqlConnection;
+
+	/**
+	 * 
+	 * @throws Exception
+	 */
+	protected void init() throws Exception {
+		try {
+			initSql();
+		} catch (Exception e) {
+			throw new Exception("Error initiating SQL!", e);
+		}
+
+		try {
+			initNetwork();
+		} catch (Exception e) {
+			throw new Exception("Error initiating Network!", e);
+		}
+	}
 
 	/**
 	 * 
@@ -66,20 +84,17 @@ public class World {
 
 	/**
 	 * 
-	 * @param user
-	 * @return
+	 * @throws Exception
 	 */
-	public Player getPlayer(String user) {
-		return worldPlayers.get(user);
+	private void initSql() throws Exception {
+		sqlConnection = DriverManager.getConnection("jdbc:mysql://localhost/rs2", JanusProperties.getString("MYSQL_USER"), JanusProperties
+				.getString("MYSQL_PASS"));
 	}
 
 	/**
 	 * 
-	 * @param user
-	 * @return
 	 */
-	public Player addPlayer(String user, Player player) {
-		return worldPlayers.put(user, player);
+	public Connection getSqlConnection() {
+		return sqlConnection;
 	}
-
 }

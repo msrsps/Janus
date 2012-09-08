@@ -11,6 +11,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.rs2.janus.net.Service;
 import org.rs2.janus.net.login.LoginRequestDecoder;
+import org.rs2.janus.net.login.LoginResponseEncoder;
 import org.rs2.janus.net.ondemand.OnDemandRequestDecoder;
 import org.rs2.janus.net.ondemand.OnDemandService;
 
@@ -54,6 +55,7 @@ public class HandshakeDecoder extends FrameDecoder {
 			int serviceCode = buffer.readByte();
 			switch (serviceCode) {
 			case 14: // Login service
+				ctx.getPipeline().addFirst(LoginResponseEncoder.class.getSimpleName(), new LoginResponseEncoder());
 				ctx.getPipeline().addBefore("handler", LoginRequestDecoder.class.getSimpleName(), new LoginRequestDecoder());
 				channel.setAttachment(loginService);
 				completeHandshake(ctx.getChannel());
@@ -62,7 +64,6 @@ public class HandshakeDecoder extends FrameDecoder {
 				ctx.getPipeline().addBefore("handler", OnDemandRequestDecoder.class.getSimpleName(), new OnDemandRequestDecoder());
 				channel.setAttachment(OnDemandService.getSingleton());
 				completeHandshake(ctx.getChannel());
-				log.info("OnDemand channel=" + channel);
 				break;
 			default:
 				log.warn("Service code " + serviceCode + " is unhandled.");

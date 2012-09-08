@@ -29,7 +29,7 @@ public class Position {
 	 * @param tileY
 	 * @param height
 	 */
-	private Position(int tileX, int tileY, int height) {
+	public Position(int tileX, int tileY, int height) {
 		super();
 		this.tileX = tileX;
 		this.tileY = tileY;
