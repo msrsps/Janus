@@ -31,7 +31,7 @@ public class OnDemandService implements Service<OnDemandRequest> {
 	 * The executor that will execute workers.
 	 */
 	private final ExecutorService executor = new ThreadPoolExecutor(JanusProperties.getInt("ONDEMAND_SERVICE_THREADS"), JanusProperties
-			.getInt("ONDEMAND_WORKER_THREADS"), 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<Runnable>());
+			.getInt("ONDEMAND_SERVICE_THREADS"), 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<Runnable>());
 
 	/**
 	 * New instance.

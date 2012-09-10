@@ -12,6 +12,7 @@ import org.rs2.janus.JanusProperties;
 import org.rs2.janus.net.NioServerNetwork;
 import org.rs2.janus.net.Service;
 import org.rs2.janus.net.login.LoginService;
+import org.rs2.janus.net.ondemand.OnDemandService;
 import org.rs2.janus.net.world.WorldChannelHandler;
 import org.rs2.janus.net.world.WorldPipelineFactory;
 
@@ -34,6 +35,11 @@ public class World {
 	 * 
 	 */
 	private final Service loginService = new LoginService(this);
+
+	/**
+	 * 
+	 */
+	private final Service ondemandService = OnDemandService.getSingleton();
 
 	/**
 	 * 
