@@ -102,7 +102,7 @@ public class ArchiveServer {
 			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**

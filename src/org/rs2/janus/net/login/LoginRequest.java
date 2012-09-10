@@ -4,7 +4,7 @@
 package org.rs2.janus.net.login;
 
 import org.rs2.janus.net.Request;
-import org.rs2.janus.world.model.entity.character.player.PlayerCredientals;
+import org.rs2.janus.world.model.entity.character.player.PlayerCredientials;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -15,7 +15,7 @@ public class LoginRequest implements Request {
 	/**
 	 * 
 	 */
-	private final PlayerCredientals credientials;
+	private final PlayerCredientials credientials;
 
 	/**
 	 * 
@@ -43,7 +43,7 @@ public class LoginRequest implements Request {
 	 * @param namehash
 	 * @param archiveCrcs
 	 */
-	public LoginRequest(PlayerCredientals credientials, boolean isLowMemory, boolean isReconnecting, int namehash, int[] archiveCrcs) {
+	public LoginRequest(PlayerCredientials credientials, boolean isLowMemory, boolean isReconnecting, int namehash, int[] archiveCrcs) {
 		this.isLowMemory = isLowMemory;
 		this.isReconnecting = isReconnecting;
 		this.namehash = namehash;
@@ -54,7 +54,7 @@ public class LoginRequest implements Request {
 	/**
 	 * @return the credientials
 	 */
-	public PlayerCredientals getCredientials() {
+	public PlayerCredientials getCredientials() {
 		return credientials;
 	}
 

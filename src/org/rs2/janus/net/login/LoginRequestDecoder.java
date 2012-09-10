@@ -6,15 +6,19 @@ package org.rs2.janus.net.login;
 import java.math.BigInteger;
 import java.util.Random;
 
+import net.burtleburtle.bob.rand.IsaacRandom;
+
 import org.apollo.util.StatefulFrameDecoder;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.rs2.janus.JanusProperties;
-import org.rs2.janus.util.IsaacRandomPair;
+import org.rs2.janus.net.login.LoginResponse.LoginResponseCode;
 import org.rs2.janus.util.TextUtil;
-import org.rs2.janus.world.model.entity.character.player.PlayerCredientals;
+import org.rs2.janus.world.model.entity.character.player.Client;
+import org.rs2.janus.world.model.entity.character.player.PlayerCredientials;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -131,7 +135,8 @@ public class LoginRequestDecoder extends StatefulFrameDecoder<LoginRequestDecode
 			long clientSeed;
 			String user;
 			String pass;
-			IsaacRandomPair isaacPair;
+			IsaacRandom decodingRandom;
+			IsaacRandom encodingRandom;
 
 			ChannelBuffer payload = ChannelBuffers.buffer(payloadSize);
 			buffer.readBytes(payload);
@@ -166,14 +171,31 @@ public class LoginRequestDecoder extends StatefulFrameDecoder<LoginRequestDecode
 			if (securePayload.readLong() != serverSeed)
 				return new Exception("Server seed mismatch.");
 
-			isaacPair = new IsaacRandomPair(clientSeed, clientSeed);
+			int[] seed = new int[4];
+			seed[0] = (int) (clientSeed >> 32);
+			seed[1] = (int) clientSeed;
+			seed[2] = (int) (serverSeed >> 32);
+			seed[3] = (int) serverSeed;
+
+			decodingRandom = new IsaacRandom(seed);
+
+			for (int index = 0; index < seed.length; index++)
+				seed[index] += 50;
+
+			encodingRandom = new IsaacRandom(seed);
 
 			uid = securePayload.readInt();
 
-			user = TextUtil.decodeText(securePayload);
-			pass = TextUtil.decodeText(securePayload);
+			user = TextUtil.decodeText(securePayload).trim();
+			pass = TextUtil.decodeText(securePayload).trim();
 
-			return new LoginRequest(new PlayerCredientals(user, pass, uid, isaacPair), lowMemoryFlag == 1, loginType == 18, namehash, archiveCrcs);
+			if ((user.equals("") || user.length() > 12) || (pass.equals("") || pass.length() > 20)) {
+				channel.write(new LoginResponse(LoginResponseCode.INVALID_CREDENTIALS)).addListener(ChannelFutureListener.CLOSE);
+				return null;
+			}
+
+			channel.setAttachment(new Client(channel, encodingRandom, decodingRandom));
+			return new LoginRequest(new PlayerCredientials(user, pass, uid), lowMemoryFlag == 1, loginType == 18, namehash, archiveCrcs);
 
 		}
 		return null;

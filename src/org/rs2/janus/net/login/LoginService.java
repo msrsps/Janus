@@ -13,6 +13,8 @@ import org.rs2.janus.JanusProperties;
 import org.rs2.janus.net.Service;
 import org.rs2.janus.net.login.LoginResponse.LoginResponseCode;
 import org.rs2.janus.world.World;
+import org.rs2.janus.world.model.Position;
+import org.rs2.janus.world.model.entity.character.player.Player;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -103,16 +105,15 @@ public class LoginService implements Service<LoginRequest> {
 					if (request.getCredientials().getPass().equals(result.getString("Pass"))) {
 						System.out.println("Successful.");
 						channel.write(new LoginResponse(LoginResponseCode.SUCCESSFUL, 0, 0));
-
+						channel.setAttachment(new Player(request.getCredientials(), new Position(result.getInt("X"), result.getInt("Y"), result
+								.getInt("Height"))));
 					} else {
 						System.out.println("Wrong pass.");
 						channel.write(new LoginResponse(LoginResponseCode.INVALID_CREDENTIALS));
 					}
 				} else {
-					System.out.println("Created account.");
-					channel.write(new LoginResponse(LoginResponseCode.SUCCESSFUL, 0, 0));
-					statement.execute("INSERT INTO characters SET User='" + request.getCredientials().getUser() + "', Pass='"
-							+ request.getCredientials().getPass() + "'");
+					System.out.println("Unknown user.");
+					channel.write(new LoginResponse(LoginResponseCode.INVALID_CREDENTIALS));
 				}
 			} catch (Exception e) {
 				System.out.println("Exception");

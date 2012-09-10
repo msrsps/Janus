@@ -11,6 +11,8 @@ import org.jboss.netty.handler.timeout.IdleStateAwareChannelUpstreamHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.rs2.janus.net.Request;
 import org.rs2.janus.net.Service;
+import org.rs2.janus.world.World;
+import org.rs2.janus.world.model.entity.character.player.Client;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -22,6 +24,18 @@ public class WorldChannelHandler extends IdleStateAwareChannelUpstreamHandler {
 	 * The logger.
 	 */
 	private static final Logger log = Logger.getLogger(WorldChannelHandler.class);
+
+	/**
+	 * 
+	 */
+	private final World world;
+
+	/**
+	 * 
+	 */
+	public WorldChannelHandler(World world) {
+		this.world = world;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -38,8 +52,8 @@ public class WorldChannelHandler extends IdleStateAwareChannelUpstreamHandler {
 			Object attachment = e.getChannel().getAttachment();
 			if (attachment instanceof Service) {
 				((Service<Request>) attachment).serviceRequest(ctx, (Request) message);
-			} else if (attachment instanceof Object) {
-				// Handle packets to player.
+			} else if (attachment instanceof Client) {
+
 			}
 		} else {
 			log.info("Unhandled message [message=" + message + ", channel=" + ctx.getChannel() + "]");

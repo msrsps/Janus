@@ -38,7 +38,7 @@ public class World {
 	/**
 	 * 
 	 */
-	private final WorldChannelHandler worldHandler = new WorldChannelHandler();
+	private final WorldChannelHandler worldHandler = new WorldChannelHandler(this);
 
 	/**
 	 * 

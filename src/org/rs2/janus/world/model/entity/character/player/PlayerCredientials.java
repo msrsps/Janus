@@ -3,13 +3,12 @@
  */
 package org.rs2.janus.world.model.entity.character.player;
 
-import org.rs2.janus.util.IsaacRandomPair;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
  */
-public class PlayerCredientals {
+public class PlayerCredientials {
 
 	/**
 	 * 
@@ -28,20 +27,14 @@ public class PlayerCredientals {
 
 	/**
 	 * 
-	 */
-	private final IsaacRandomPair isaacPair;
-
-	/**
-	 * 
 	 * @param user
 	 * @param pass
 	 * @param uid
 	 */
-	public PlayerCredientals(String user, String pass, int uid, IsaacRandomPair isaacPair) {
+	public PlayerCredientials(String user, String pass, int uid) {
 		this.user = user;
 		this.pass = pass;
 		this.uid = uid;
-		this.isaacPair = isaacPair;
 	}
 
 	/**
@@ -63,13 +56,6 @@ public class PlayerCredientals {
 	 */
 	public int getUid() {
 		return uid;
-	}
-
-	/**
-	 * @return the isaacPair
-	 */
-	public IsaacRandomPair getIsaacPair() {
-		return isaacPair;
 	}
 
 }

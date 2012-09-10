@@ -15,14 +15,21 @@ public class Player extends Character {
 	/**
 	 * 
 	 */
-	private final PlayerCredientals credientals;
+	private final PlayerCredientials credientials;
 
 	/**
 	 * @param position
 	 */
-	public Player(PlayerCredientals credientals, Position position) {
+	public Player(PlayerCredientials credientials, Position position) {
 		super(position);
-		this.credientals = credientals;
+		this.credientials = credientials;
+	}
+
+	/**
+	 * @return
+	 */
+	public PlayerCredientials getCredentials() {
+		return credientials;
 	}
 
 }
