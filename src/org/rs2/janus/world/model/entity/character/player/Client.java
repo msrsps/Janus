@@ -3,10 +3,12 @@
  */
 package org.rs2.janus.world.model.entity.character.player;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import net.burtleburtle.bob.rand.IsaacRandom;
 
 import org.jboss.netty.channel.Channel;
-import org.rs2.janus.net.packet.Packet;
+import org.rs2.janus.world.net.packet.Packet;
 
 /**
  * Holds all network information of a client that's connected to a world. This
@@ -35,6 +37,17 @@ public class Client {
 	/**
 	 * 
 	 */
+	// Is 10 too big? Too small?
+	private final ArrayBlockingQueue<Packet> packetQueue = new ArrayBlockingQueue<Packet>(10);
+
+	/**
+	 * 
+	 */
+	private Player player;
+
+	/**
+	 * 
+	 */
 	public Client(Channel channel, IsaacRandom encoder, IsaacRandom decoder) {
 		this.channel = channel;
 		this.encoder = encoder;
@@ -47,8 +60,15 @@ public class Client {
 	 * @param packet
 	 *            The packet to send.
 	 */
-	public void write(Packet packet) {
+	public void send(Packet packet) {
 		channel.write(packet);
+	}
+
+	/**
+	 * 
+	 */
+	public void receive(Packet packet) {
+		packetQueue.add(packet);
 	}
 
 	/**
@@ -63,6 +83,14 @@ public class Client {
 	 */
 	public IsaacRandom getDecoder() {
 		return decoder;
+	}
+
+	/**
+	 * @param player
+	 *            the player to set
+	 */
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 
 }

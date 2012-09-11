@@ -13,7 +13,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 /**
- * A network wrapper for Netty, this network provides services.
+ * A server network wrapper for Netty.
  * 
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
  * 
@@ -74,14 +74,7 @@ public class NioServerNetwork {
 	public void bind(int port) throws Exception {
 		log.info("Attempting to bind network to port " + port + "...");
 
-		if (bootstrap.getPipelineFactory() == null && bootstrap.getPipeline() == null)
-			throw new Exception("You must first set a pipeline or pipeline factory before binding!");
-
-		try {
-			bootstrap.bind(new InetSocketAddress(port));
-		} catch (Exception e) {
-			throw new Exception("Error binding network to port, is port already in use?", e);
-		}
+		bootstrap.bind(new InetSocketAddress(port));
 
 		log.info("... Network successfully binded to port " + port + "!");
 	}
