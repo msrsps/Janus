@@ -12,9 +12,9 @@ import org.jboss.netty.buffer.ChannelBuffer;
 public class TextUtil {
 
 	/**
-	 * 
+	 * Reads a line from a channel buffer.
 	 */
-	public static String decodeText(ChannelBuffer buffer) {
+	public static String readLine(ChannelBuffer buffer) {
 		StringBuilder builder = new StringBuilder();
 		short character;
 		while (buffer.readable() && (character = buffer.readUnsignedByte()) != 10)

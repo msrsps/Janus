@@ -10,44 +10,82 @@ package org.rs2.janus.world.model;
 public class Position {
 
 	/**
-	 * 
+	 * The position on the x-axis.
 	 */
-	private final int tileX;
+	private final int x;
 
 	/**
-	 * 
+	 * The position on the y-axis.
 	 */
-	private final int tileY;
+	private final int y;
 
 	/**
-	 * 
+	 * The height of the position.
 	 */
 	private final int height;
 
 	/**
-	 * @param tileX
-	 * @param tileY
+	 * New instance.
+	 * 
+	 * @param x
+	 *            The position on the x-axis.
+	 * @param y
+	 *            The position on the y-axis.
 	 * @param height
+	 *            The height of the position.
 	 */
-	public Position(int tileX, int tileY, int height) {
-		super();
-		this.tileX = tileX;
-		this.tileY = tileY;
+	public Position(int x, int y, int height) {
+		this.x = x;
+		this.y = y;
 		this.height = height;
 	}
 
 	/**
-	 * @return the tileX
+	 * 
+	 * @param formatted
+	 * @return
 	 */
-	public int getTileX() {
-		return tileX;
+	public int getChunkX(boolean formatted) {
+		return formatted ? (x >> 3) - 6 : (x >> 3);
 	}
 
 	/**
-	 * @return the tileY
+	 * 
+	 * @param formatted
+	 * @return
 	 */
-	public int getTileY() {
-		return tileY;
+	public int getChunkY(boolean formatted) {
+		return formatted ? (y >> 3) - 6 : (y >> 3);
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getRegionX() {
+		return x >> 6;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getRegionY() {
+		return y >> 6;
+	}
+
+	/**
+	 * @return the x
+	 */
+	public int getX() {
+		return x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public int getY() {
+		return y;
 	}
 
 	/**
@@ -55,44 +93,6 @@ public class Position {
 	 */
 	public int getHeight() {
 		return height;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + height;
-		result = prime * result + tileX;
-		result = prime * result + tileY;
-		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Position other = (Position) obj;
-		if (height != other.height)
-			return false;
-		if (tileX != other.tileX)
-			return false;
-		if (tileY != other.tileY)
-			return false;
-		return true;
 	}
 
 }

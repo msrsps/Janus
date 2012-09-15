@@ -3,20 +3,11 @@
  */
 package org.rs2.janus.world;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
-import org.rs2.janus.JanusProperties;
-import org.rs2.janus.net.NioServerNetwork;
-import org.rs2.janus.world.net.Service;
-import org.rs2.janus.world.net.WorldChannelHandler;
-import org.rs2.janus.world.net.WorldPipelineFactory;
-import org.rs2.janus.world.net.login.LoginRequest;
-import org.rs2.janus.world.net.login.LoginService;
-import org.rs2.janus.world.net.ondemand.OnDemandRequest;
-import org.rs2.janus.world.net.ondemand.OnDemandService;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.rs2.janus.world.model.entity.character.npc.Npc;
+import org.rs2.janus.world.model.entity.character.player.Player;
 
 /**
  * @author Michael Schmidt <H3llKing> <msrsps@hotmail.com>
@@ -27,82 +18,77 @@ public class World {
 	/**
 	 * 
 	 */
-	private static final Logger log = Logger.getLogger(World.class);
+	private final WorldEngine engine = new WorldEngine(this);
 
 	/**
 	 * 
 	 */
-	private final Map<Class, Service> services = new HashMap<Class, Service>();
+	@SuppressWarnings("unchecked")
+	// FIXME gotta protect this from concurrency issues when players log in!
+	private final ListOrderedMap globalPlayers = new ListOrderedMap();
 
 	/**
 	 * 
 	 */
-	private final WorldContext context = new WorldContext(this);
+	private final ArrayList<Npc> globalNpcs = new ArrayList<Npc>();
+
+	/**
+	 * @return the globalPlayers
+	 */
+	public ListOrderedMap getGlobalPlayers() {
+		return globalPlayers;
+	}
+
+	/**
+	 * @return the globalNpcs
+	 */
+	public ArrayList<Npc> getGlobalNpcs() {
+		return globalNpcs;
+	}
 
 	/**
 	 * 
 	 */
-	private final NioServerNetwork network = new NioServerNetwork(Executors.newFixedThreadPool(JanusProperties.getInt("WORLD_NETWORK_THREADS")));
+	public boolean addPlayer(String name, Player player) {
+		if (globalPlayers.size() >= 2000) // TODO Load max players from
+											// properties.
+			return false;
+
+		globalPlayers.put(name, player);
+		player.setIndex(globalPlayers.indexOf(name));
+		return true;
+	}
 
 	/**
 	 * 
 	 */
-	private final WorldEngine engine = new WorldEngine(context);
+	public void removePlayer(String name) {
+		Player player = (Player) globalPlayers.remove(name);
+		player.setIndex(-1);
+
+	}
 
 	/**
 	 * 
 	 */
-	private void init() {
-		log.info("Initiating world.");
-
-		log.info("Initiating services.");
-		initServices();
-
-		log.info("Initiating network.");
-		initNetwork();
-
-		log.info("World successfully initiated.");
-	}
-
-	private void initServices() {
-		services.put(LoginRequest.class, LoginService.getSingleton());
-		services.put(OnDemandRequest.class, OnDemandService.getSingleton());
-	}
-
-	private void initNetwork() {
-		try {
-			WorldChannelHandler channelHandler = new WorldChannelHandler(context);
-			WorldPipelineFactory pipelineFactory = new WorldPipelineFactory(channelHandler);
-
-			network.setPipelineFactory(pipelineFactory);
-			network.bind(JanusProperties.getInt("GAME_SERVER_PORT"));
-		} catch (Exception e) {
-			throw new RuntimeException("Error initiating network.", e);
-		}
-	}
-
-	public static void main(String[] args) {
-		try {
-			World world = new World();
-			world.init();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+	public void removePlayer(Player player) {
+		globalPlayers.remove(player.getIndex());
+		player.setIndex(-1);
 	}
 
 	/**
-	 * @return the engine
+	 * 
 	 */
-	public WorldEngine getEngine() {
-		return engine;
+	public void addNpc(Npc npc) {
+		globalNpcs.add(npc);
+		npc.setIndex(globalNpcs.indexOf(npc));
 	}
 
 	/**
-	 * @return the services
+	 * 
 	 */
-	public Map<Class, Service> getServices() {
-		return services;
+	public void removeNpc(Npc npc) {
+		globalNpcs.remove(npc.getIndex());
+		npc.setIndex(-1);
 	}
-
 }
